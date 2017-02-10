@@ -1,0 +1,4 @@
+#!/bin/bash 
+
+export mysql_root_passwd=openstack
+export rabbit_passwd=openstack 
