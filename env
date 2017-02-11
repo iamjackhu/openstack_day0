@@ -1,4 +1,6 @@
 #!/bin/bash 
 
 export mysql_root_passwd=openstack
-export rabbit_passwd=openstack 
+export rabbit_passwd=openstack
+export identity_passwd=openstack
+export glance_passwd=openstack
