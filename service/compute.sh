@@ -28,10 +28,7 @@ EOF"
 
 	ssh root@$TARGET ". adminrc"
 
-	ssh root@$TARGET "openstack user create --domain default --password-prompt nova<<EOF
-$PASSWD
-$PASSWD
-EOF"
+	ssh root@$TARGET "openstack user create --domain default --password $PASSWD nova"
 
 	ssh root@$TARGET "openstack role add --project service --user nova admin"
 	ssh root@$TARGET "openstack service create --name nova --description \"OpenStack Compute\" compute"

@@ -8,4 +8,6 @@ function install_memcached
 	ssh root@$TARGET "yum -y install memcached python-memcached"
 	ssh root@$TARGET "systemctl enable memcached.service"
 	ssh root@$TARGET "systemctl start memcached.service"
+
+	echo "### Memcached installed"
 }

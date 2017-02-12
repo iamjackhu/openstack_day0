@@ -9,4 +9,6 @@ function install_rabitmq
 	ssh root@$TARGET "systemctl start rabbitmq-server.service"
 	ssh root@$TARGET "rabbitmqctl add_user openstack $PASSWD"
 	ssh root@$TARGET "rabbitmqctl set_permissions openstack \".*\" \".*\" \".*\" "
+
+	echo "### RabbitMQ installed"
 }

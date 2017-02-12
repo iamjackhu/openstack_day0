@@ -19,6 +19,7 @@ EOF"
 
 	ssh root@$TARGET "yum -y install openstack-keystone httpd mod_wsgi python-openstackclient"
 
+    #  /etc/keystone/keystone.conf
     ssh root@$TARGET "sed -i '/\[database\]/a "connection = mysql+pymysql://keystone:$PASSWD@$TARGET/keystone" ' /etc/keystone/keystone.conf"
     ssh root@$TARGET "sed -i '/\[token\]/a "provider = fernet" ' /etc/keystone/keystone.conf"
     ssh root@$TARGET "su -s /bin/sh -c \"keystone-manage db_sync\" keystone"
@@ -36,22 +37,21 @@ EOF"
   	ssh root@$TARGET "systemctl enable httpd.service"
   	ssh root@$TARGET "systemctl start httpd.service"
 
-    ssh root@$TARGET "export OS_USERNAME=admin;\
-export OS_PASSWORD=$PASSWD;\
-export OS_PROJECT_NAME=admin;\
-export OS_USER_DOMAIN_NAME=Default;\
-export OS_PROJECT_DOMAIN_NAME=Default;\
-export OS_AUTH_URL=http://$TARGET:35357/v3;\
-export OS_IDENTITY_API_VERSION=3;"
+    ssh root@$TARGET "echo 'export OS_USERNAME=admin' > /tmp/initrc"
+    ssh root@$TARGET "echo 'export OS_PASSWORD=$PASSWD' >> /tmp/initrc"
+    ssh root@$TARGET "echo 'export OS_PROJECT_NAME=admin' >> /tmp/initrc"
+    ssh root@$TARGET "echo 'export OS_USER_DOMAIN_NAME=Default' >> /tmp/initrc"
+    ssh root@$TARGET "echo 'export OS_PROJECT_DOMAIN_NAME=Default' >> /tmp/initrc"
+    ssh root@$TARGET "echo 'export OS_AUTH_URL=http://$TARGET:35357/v3' >> /tmp/initrc"
+    ssh root@$TARGET "echo 'export OS_IDENTITY_API_VERSION=3' >> /tmp/initrc"
 
-	ssh root@$TARGET "openstack project create --domain default --description 'Service Project' service"
-	ssh root@$TARGET "openstack project create --domain default --description 'Demo Project' demo"
-	ssh root@$TARGET "openstack user create --domain default --password-prompt demo<<EOF
-demo
-demo
-EOF"
-	ssh root@$TARGET "openstack role create user"
-	ssh root@$TARGET "openstack role add --project demo --user demo user"
+  ssh root@$TARGET "source /tmp/initrc"
+
+	ssh root@$TARGET "source /tmp/initrc;openstack project create --domain default --description 'Service Project' service"
+	ssh root@$TARGET "source /tmp/initrc;openstack project create --domain default --description 'Demo Project' demo"
+	ssh root@$TARGET "source /tmp/initrc;openstack user create --domain default --password demo demo"
+	ssh root@$TARGET "source /tmp/initrc;openstack role create user"
+	ssh root@$TARGET "source /tmp/initrc;openstack role add --project demo --user demo user"
 
 	ssh root@$TARGET "echo -e \"export OS_PROJECT_DOMAIN_NAME=Default\n\
 export OS_USER_DOMAIN_NAME=Default\n\
@@ -74,5 +74,8 @@ export OS_IMAGE_API_VERSION=2\n\
 \" > /root/demo-openrc"
 
   ssh root@$TARGET "sed -i 's/ admin_token_auth / /g' /etc/keystone/keystone-paste.ini"
+  ssh root@$TARGET "systemctl restart httpd.service"
+
+  echo "### Keystone installed"
 
 }

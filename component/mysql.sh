@@ -30,4 +30,5 @@ Y
 Y
 EOF"
 	
+	echo "### MySQL installed"
 }

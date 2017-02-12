@@ -20,4 +20,6 @@ function install_dashboard
     ssh root@$TARGET "echo -e \"OPENSTACK_API_VERSIONS = {\"identity\": 3,\"image\": 2,\"volume\": 2,}\" >> /etc/openstack-dashboard/local_settings"
 
 	ssh root@$TARGET "systemctl restart httpd.service memcached.service"
+
+    echo "### Dashboard installed"
 }

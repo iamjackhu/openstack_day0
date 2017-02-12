@@ -21,10 +21,8 @@ EOF"
 
 	ssh root@$TARGET ". adminrc"
 
-	ssh root@$TARGET "openstack user create --domain default --password-prompt neutron<<EOF
-$PASSWD
-$PASSWD
-EOF"
+	ssh root@$TARGET "openstack user create --domain default --password $PASSWD neutron"
+	
 	ssh root@$TARGET "openstack role add --project service --user neutron admin"
 	ssh root@$TARGET "openstack service create --name neutron --description \"OpenStack Networking\" network"
 
