@@ -56,7 +56,7 @@ project_name = service\\n\
 username = glance\\n\
 password = $PASSWD\\n\
 " ' /etc/glance/glance-registry.conf"
-	ssh root@$TARGET "sed -i '/\[paste_deploy\]/a "flavor = keystone\n" ' /etc/glance/glance-registry.conf"
+	ssh root@$TARGET "sed -i '/\[paste_deploy\]/a "flavor = keystone\\n" ' /etc/glance/glance-registry.conf"
 
 	ssh root@$TARGET "su -s /bin/sh -c \"glance-manage db_sync\" glance"
 
