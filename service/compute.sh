@@ -6,6 +6,7 @@ function install_compute_on_controller
 	PASSWD=$2
 	MYSQLPASSWD=$3
 	RABBIT_PASSWD=$4
+	MY_IP=`hostname -i`
 
 	ssh root@$TARGET "mysql -e \"CREATE DATABASE nova_api;\" -u root -p<<EOF
 $MYSQLPASSWD
@@ -19,22 +20,22 @@ EOF"
 	ssh root@$TARGET "mysql -e \"GRANT ALL PRIVILEGES ON nova.* TO nova@'%' IDENTIFIED BY '$PASSWD';\" -u root -p<<EOF
 $MYSQLPASSWD
 EOF"
-	ssh root@$TARGET "mysql -e \"GRANT ALL PRIVILEGES ON nova_api.* TO nova_api@'localhost' IDENTIFIED BY '$PASSWD';\" -u root -p<<EOF
+	ssh root@$TARGET "mysql -e \"GRANT ALL PRIVILEGES ON nova_api.* TO nova@'localhost' IDENTIFIED BY '$PASSWD';\" -u root -p<<EOF
 $MYSQLPASSWD
 EOF"
-	ssh root@$TARGET "mysql -e \"GRANT ALL PRIVILEGES ON nova_api.* TO nova_api@'%' IDENTIFIED BY '$PASSWD';\" -u root -p<<EOF
+	ssh root@$TARGET "mysql -e \"GRANT ALL PRIVILEGES ON nova_api.* TO nova@'%' IDENTIFIED BY '$PASSWD';\" -u root -p<<EOF
 $MYSQLPASSWD
 EOF"
 
 	ssh root@$TARGET ". adminrc"
 
-	ssh root@$TARGET "openstack user create --domain default --password $PASSWD nova"
+	ssh root@$TARGET ". adminrc;openstack user create --domain default --password $PASSWD nova"
 
-	ssh root@$TARGET "openstack role add --project service --user nova admin"
-	ssh root@$TARGET "openstack service create --name nova --description \"OpenStack Compute\" compute"
-	ssh root@$TARGET "openstack endpoint create --region RegionOne compute public http://$TARGET8774/v2.1/%\(tenant_id\)s"
-	ssh root@$TARGET "openstack endpoint create --region RegionOne compute internal http://$TARGET:8774/v2.1/%\(tenant_id\)s"
-	ssh root@$TARGET "openstack endpoint create --region RegionOne compute admin http://$TARGET:8774/v2.1/%\(tenant_id\)s"
+	ssh root@$TARGET ". adminrc;openstack role add --project service --user nova admin"
+	ssh root@$TARGET ". adminrc;openstack service create --name nova --description \"OpenStack Compute\" compute"
+	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne compute public http://$TARGET8774/v2.1/%\(tenant_id\)s"
+	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne compute internal http://$TARGET:8774/v2.1/%\(tenant_id\)s"
+	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne compute admin http://$TARGET:8774/v2.1/%\(tenant_id\)s"
 
 	ssh root@$TARGET "yum -y install openstack-nova-api openstack-nova-conductor \
   openstack-nova-console openstack-nova-novncproxy \
@@ -46,7 +47,7 @@ EOF"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "enabled_apis = osapi_compute,metadata" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$TARGET" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "auth_strategy = keystone" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "my_ip = $TARGET" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "my_ip = $MY_IP" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
 
@@ -83,6 +84,7 @@ function install_compute_on_computer
 	PASSWD=$2
 	RABBIT_PASSWD=$3
 	CONTROLLER=$4
+	MY_IP=`hostname -i`
 
 	ssh root@$TARGET "yum -y instal openstack-nova-compute"
 
@@ -91,7 +93,7 @@ function install_compute_on_computer
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "enabled_apis = osapi_compute,metadata" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$CONTROLLER" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "auth_strategy = keystone" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "my_ip = $TARGET" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "my_ip = $MY_IP" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
 
