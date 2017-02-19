@@ -5,3 +5,5 @@ export rabbit_passwd=openstack
 export identity_passwd=openstack
 export glance_passwd=openstack
 export compute_passwd=openstack
+export network_passwd=openstack
+export controller_provider_interface=enp0s20f0
