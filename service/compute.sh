@@ -42,14 +42,14 @@ EOF"
   openstack-nova-scheduler"
 
   	#/etc/nova/nova.conf
-  	ssh root@$TARGET "sed -i '/\[database\]/a "connection = mysql+pymysql://nova:$PASSWD@$TARGET/nova" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[api_database\]/a "connection = mysql+pymysql://nova:$PASSWD@$TARGET/nova_api" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "enabled_apis = osapi_compute,metadata" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$TARGET" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "auth_strategy = keystone" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "my_ip = $MY_IP" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
+  	ssh root@$TARGET "sed -i '/^\[database\]/a "connection = mysql+pymysql://nova:$PASSWD@$TARGET/nova" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[api_database\]/a "connection = mysql+pymysql://nova:$PASSWD@$TARGET/nova_api" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "enabled_apis = osapi_compute,metadata" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$TARGET" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "auth_strategy = keystone" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "my_ip = ${MY_IP}" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
 
 	ssh root@$TARGET "sed -i '/\[keystone_authtoken\]/a "auth_uri = http://$TARGET:5000\n\
 auth_url = http://$TARGET:35357\n\
@@ -61,10 +61,10 @@ project_name = service\n\
 username = nova\n\
 password = $PASSWD" ' /etc/nova/nova.conf"
 
-	ssh root@$TARGET "sed -i '/\[vnc\]/a "vncserver_listen = $my_ip" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[vnc\]/a "vncserver_proxyclient_address = $my_ip" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[glance\]/a "api_servers = http://$TARGET:9292" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[oslo_concurrency\]/a "lock_path = /var/lib/nova/tmp" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_listen = $my_ip" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_proxyclient_address = $my_ip" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[glance\]/a "api_servers = http://$TARGET:9292" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[oslo_concurrency\]/a "lock_path = /var/lib/nova/tmp" ' /etc/nova/nova.conf"
 	
 	ssh root@$TARGET "su -s /bin/sh -c \"nova-manage api_db sync\" nova"
 	ssh root@$TARGET "su -s /bin/sh -c \"nova-manage db sync\" nova"
@@ -90,14 +90,14 @@ function install_compute_on_computer
 
 	#/etc/nova/nova.conf
 
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "enabled_apis = osapi_compute,metadata" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$CONTROLLER" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "auth_strategy = keystone" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "my_ip = $MY_IP" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "enabled_apis = osapi_compute,metadata" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$CONTROLLER" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "auth_strategy = keystone" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "my_ip = ${MY_IP}" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
 
-	ssh root@$TARGET "sed -i '/\[keystone_authtoken\]/a "auth_uri = http://$CONTROLLER:5000\n\
+	ssh root@$TARGET "sed -i '/^\[keystone_authtoken\]/a "auth_uri = http://$CONTROLLER:5000\n\
 auth_url = http://$CONTROLLER:35357\n\
 memcached_servers = $CONTROLLER:11211\n\
 auth_type = password\n\
@@ -107,13 +107,13 @@ project_name = service\n\
 username = nova\n\
 password = $PASSWD" ' /etc/nova/nova.conf"
 	
-	ssh root@$TARGET "sed -i '/\[vnc\]/a "enabled = True" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[vnc\]/a "vncserver_listen = 0.0.0.0" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[vnc\]/a "vncserver_proxyclient_address = $my_ip" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[vnc\]/a "novncproxy_base_url = http://$CONTROLLER:6080/vnc_auto.html" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "enabled = True" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_listen = 0.0.0.0" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_proxyclient_address = $my_ip" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "novncproxy_base_url = http://$CONTROLLER:6080/vnc_auto.html" ' /etc/nova/nova.conf"
 
-	ssh root@$TARGET "sed -i '/\[glance\]/a "api_servers = http://$CONTROLLER:9292" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/\[oslo_concurrency\]/a "lock_path = /var/lib/nova/tmp" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[glance\]/a "api_servers = http://$CONTROLLER:9292" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[oslo_concurrency\]/a "lock_path = /var/lib/nova/tmp" ' /etc/nova/nova.conf"
 	
 	ssh root@$TARGET "systemctl enable libvirtd.service openstack-nova-compute.service"
 	ssh root@$TARGET "systemctl start libvirtd.service openstack-nova-compute.service"
