@@ -33,7 +33,7 @@ EOF"
 	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne network admin http://$TARGET:9696"
 
 	# provider network
-	ssh root@$TARGET "yum -y install openstack-neutron openstack-neutron-ml2 \
+	ssh root@$TARGET "yum -y --nogpgcheck install openstack-neutron openstack-neutron-ml2 \
   openstack-neutron-linuxbridge ebtables"
 
   	#/etc/neutron/neutron.conf
@@ -126,7 +126,7 @@ function install_network_on_computer
 	NOVA_PASS=$5
 	INTERFACE=$6
 
-	ssh root@$TARGET "yum -y openstack-neutron-linuxbridge ebtables ipset"
+	ssh root@$TARGET "yum -y --nogpgcheck install openstack-neutron-linuxbridge ebtables ipset"
 
 	#/etc/neutron/neutron.conf
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$CONTROLLER" ' /etc/neutron/neutron.conf"
@@ -151,7 +151,7 @@ password = $PASSWD" ' /etc/neutron/neutron.conf"
 	ssh root@$TARGET "sed -i '/^\[securitygroup\]/a "firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver" ' /etc/neutron/plugins/ml2/linuxbridge_agent.ini"
 	
 	#/etc/nova/nova.conf
-	ssh root@$TARGET "sed -i '/\[keystone_authtoken\]/a "url = http://$CONTROLLER:9696\\n\
+	ssh root@$TARGET "sed -i '/^\[neutron\]/a "url = http://$CONTROLLER:9696\\n\
 auth_url = http://$CONTROLLER:35357\\n\
 auth_type = password\\n\
 project_domain_name = Default\\n\

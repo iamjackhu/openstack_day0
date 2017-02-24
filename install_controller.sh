@@ -1,11 +1,10 @@
 #!/bin/bash
 
 HOST=$1
-PASSWD=$2
 
 source ./env
 
-prepare
+#prepare
 source ./service/prepare.sh
 initial_host $HOST
 

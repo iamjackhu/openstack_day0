@@ -33,11 +33,11 @@ EOF"
 
 	ssh root@$TARGET ". adminrc;openstack role add --project service --user nova admin"
 	ssh root@$TARGET ". adminrc;openstack service create --name nova --description \"OpenStack Compute\" compute"
-	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne compute public http://$TARGET8774/v2.1/%\(tenant_id\)s"
+	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne compute public http://$TARGET:8774/v2.1/%\(tenant_id\)s"
 	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne compute internal http://$TARGET:8774/v2.1/%\(tenant_id\)s"
 	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne compute admin http://$TARGET:8774/v2.1/%\(tenant_id\)s"
 
-	ssh root@$TARGET "yum -y install openstack-nova-api openstack-nova-conductor \
+	ssh root@$TARGET "yum -y --nogpgcheck install openstack-nova-api openstack-nova-conductor \
   openstack-nova-console openstack-nova-novncproxy \
   openstack-nova-scheduler"
 
@@ -47,18 +47,18 @@ EOF"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "enabled_apis = osapi_compute,metadata" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "transport_url = rabbit://openstack:$RABBIT_PASSWD@$TARGET" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "auth_strategy = keystone" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "my_ip = ${MY_IP}" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "my_ip = $MY_IP" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
 
-	ssh root@$TARGET "sed -i '/\[keystone_authtoken\]/a "auth_uri = http://$TARGET:5000\n\
-auth_url = http://$TARGET:35357\n\
-memcached_servers = $TARGET:11211\n\
-auth_type = password\n\
-project_domain_name = Default\n\
-user_domain_name = Default\n\
-project_name = service\n\
-username = nova\n\
+	ssh root@$TARGET "sed -i '/^\[keystone_authtoken\]/a "auth_uri = http://$TARGET:5000\\n\
+auth_url = http://$TARGET:35357\\n\
+memcached_servers = $TARGET:11211\\n\
+auth_type = password\\n\
+project_domain_name = Default\\n\
+user_domain_name = Default\\n\
+project_name = service\\n\
+username = nova\\n\
 password = $PASSWD" ' /etc/nova/nova.conf"
 
 	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_listen = $my_ip" ' /etc/nova/nova.conf"
@@ -86,7 +86,7 @@ function install_compute_on_computer
 	CONTROLLER=$4
 	MY_IP=`hostname -i`
 
-	ssh root@$TARGET "yum -y instal openstack-nova-compute"
+	ssh root@$TARGET "yum -y --nogpgcheck install openstack-nova-compute"
 
 	#/etc/nova/nova.conf
 
@@ -97,14 +97,14 @@ function install_compute_on_computer
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "use_neutron = True" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "firewall_driver = nova.virt.firewall.NoopFirewallDriver" ' /etc/nova/nova.conf"
 
-	ssh root@$TARGET "sed -i '/^\[keystone_authtoken\]/a "auth_uri = http://$CONTROLLER:5000\n\
-auth_url = http://$CONTROLLER:35357\n\
-memcached_servers = $CONTROLLER:11211\n\
-auth_type = password\n\
-project_domain_name = Default\n\
-user_domain_name = Default\n\
-project_name = service\n\
-username = nova\n\
+	ssh root@$TARGET "sed -i '/^\[keystone_authtoken\]/a "auth_uri = http://$CONTROLLER:5000\\n\
+auth_url = http://$CONTROLLER:35357\\n\
+memcached_servers = $CONTROLLER:11211\\n\
+auth_type = password\\n\
+project_domain_name = Default\\n\
+user_domain_name = Default\\n\
+project_name = service\\n\
+username = nova\\n\
 password = $PASSWD" ' /etc/nova/nova.conf"
 	
 	ssh root@$TARGET "sed -i '/^\[vnc\]/a "enabled = True" ' /etc/nova/nova.conf"
