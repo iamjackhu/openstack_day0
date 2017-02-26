@@ -6,5 +6,11 @@ export identity_passwd=openstack
 export glance_passwd=openstack
 export compute_passwd=openstack
 export network_passwd=openstack
+export swift_passwd=openstack
+
 export controller_provider_interface=enp0s20f0
 export computer_provider_interface=enp0s20f0
+
+export swift_node1=10.0.1.103
+export swift_node2=10.0.1.104
+export swift_node3=10.0.1.105

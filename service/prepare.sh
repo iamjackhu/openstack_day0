@@ -1,5 +1,12 @@
 #!/bin/bash
 
+function getHostIP
+{
+	$host_name=$1
+	host_ip=`/usr/bin/hostname -i`
+	return $host_ip
+}
+
 function initial_host
 {
 	TARGET=$1
@@ -10,6 +17,7 @@ function initial_host
 	ssh root@$TARGET 'yum -y update'
 	ssh root@$TARGET 'yum install -y https://rdoproject.org/repos/rdo-release.rpm'
 	ssh root@$TARGET 'yum -y upgrade'
+	ssh root@$TARGET 'yum -y install wget'
 
 	# ssh root@$TARGET 'yum -y install yum-utils'
 	# ssh root@$TARGET 'yum -y install deltarpm'

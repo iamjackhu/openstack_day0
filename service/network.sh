@@ -86,7 +86,7 @@ password = $NOVA_PASS" ' /etc/neutron/neutron.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "enable_isolated_metadata = True" ' /etc/neutron/dhcp_agent.ini"
 	
 	#/etc/neutron/metadata_agent.ini 
-	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "nova_metadata_ip = ${MY_IP}" ' /etc/neutron/metadata_agent.ini "
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "nova_metadata_ip = $MY_IP" ' /etc/neutron/metadata_agent.ini "
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "metadata_proxy_shared_secret = METADATA_SECRET" ' /etc/neutron/metadata_agent.ini "
 	
 	#/etc/nova/nova.conf
