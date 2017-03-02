@@ -1,16 +1,27 @@
 #!/bin/bash
 
+function init_swift_hostname
+{
+	TARGET=$1
+	ssh root@$TARGET "echo '10.0.3.102	proxy-server' >> /etc/hosts"
+	ssh root@$TARGET "echo '10.0.3.103	swift1' >> /etc/hosts"
+	ssh root@$TARGET "echo '10.0.3.104	swift2' >> /etc/hosts"
+	ssh root@$TARGET "echo '10.0.3.105	swift3' >> /etc/hosts"
+}
+
 ### this step need todo on the node which want to access the storage service
 function install_common_on_each_node
 {
 	TARGET=$1
 
-	ssh root@$TARGET "mkdir -p /etc/swift;chown -R root:swift /etc/swift"
+	# init_swift_hostname $TARGET
+
+	ssh root@$TARGET "mkdir -p /etc/swift;"
 
 	ssh root@$TARGET "yum -y --nogpgcheck install openstack-swift-proxy python-swiftclient memcached"
 
 	ssh root@$TARGET "curl -o /etc/swift/swift.conf http://installer/install/openstack-config/swift.conf"
-	
+	ssh root@$TARGET "chown -R root:swift /etc/swift"
 	#/etc/swift/swift.conf
 	
 	ssh root@$TARGET "systemctl enable openstack-swift-proxy.service memcached.service"
@@ -23,14 +34,17 @@ function install_swift_on_controller
 	TARGET=$1
 	PASSWD=$2
 	CONTROLLER=$3
+	PROXYSERVER=$4
+
+	init_swift_hostname $TARGET
 
 	ssh root@$TARGET ". adminrc;openstack user create --domain default --password $PASSWD swift"
 	ssh root@$TARGET ". adminrc;openstack role add --project service --user swift admin"
 	ssh root@$TARGET ". adminrc;openstack service create --name swift --description \"OpenStack Object Storage\" object-store"
 
-	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne object-store public http://$CONTROLLER:8080/v1/AUTH_%\(tenant_id\)s"
-	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne object-store internal http://$CONTROLLER:8080/v1/AUTH_%\(tenant_id\)s"
-	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne object-store admin http://$CONTROLLER:8080/v1"
+	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne object-store public http://$PROXYSERVER:8080/v1/AUTH_%\(tenant_id\)s"
+	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne object-store internal http://$PROXYSERVER:8080/v1/AUTH_%\(tenant_id\)s"
+	ssh root@$TARGET ". adminrc;openstack endpoint create --region RegionOne object-store admin http://$PROXYSERVER:8080/v1"
 
 	ssh root@$TARGET "yum -y --nogpgcheck install openstack-swift-proxy python-swiftclient python-keystoneclient python-keystonemiddleware memcached "
 
@@ -39,6 +53,7 @@ function install_swift_on_controller
 	#/etc/swift/proxy-server.conf
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "user = swift" ' /etc/swift/proxy-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "swift_dir = /etc/swift" ' /etc/swift/proxy-server.conf"
+	# ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_ip = $PROXYSERVER" ' /etc/swift/proxy-server.conf"
 
 	ssh root@$TARGET "sed -i -e 's/ tempurl / authtoken /g' /etc/swift/proxy-server.conf"
 	ssh root@$TARGET "sed -i -e 's/ tempauth / keystoneauth /g' /etc/swift/proxy-server.conf"
@@ -72,6 +87,7 @@ function install_swift_on_storage
 {
 	TARGET=$1
 	PASSWD=$2
+	SWIFTIP=$3
 
 	ssh root@$TARGET "yum -y --nogpgcheck install xfsprogs rsync "
 
@@ -92,7 +108,7 @@ function install_swift_on_storage
 	ssh root@$TARGET "mkfs.xfs -f /dev/sdb"
 	ssh root@$TARGET "mkdir -p /srv/node/sdb"
 
-	/etc/fstab
+	#/etc/fstab
 	ssh root@$TARGET "echo '/dev/sdb /srv/node/sdb xfs noatime,nodiratime,nobarrier,logbufs=8 0 2' >> /etc/fstab"
 
 	ssh root@$TARGET "mount /srv/node/sdb"
@@ -135,7 +151,7 @@ function install_swift_on_storage
 	
 
 	#/etc/swift/account-server.conf
-	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_ip = $TARGET" ' /etc/swift/account-server.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_ip = $SWIFTIP" ' /etc/swift/account-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_port = 6002" ' /etc/swift/account-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "user = swift" ' /etc/swift/account-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "swift_dir = /etc/swift" ' /etc/swift/account-server.conf"
@@ -145,7 +161,7 @@ function install_swift_on_storage
 	ssh root@$TARGET "sed -i '/^\[filter:recon\]/a "recon_cache_path = /var/cache/swift" ' /etc/swift/account-server.conf"
 	
 	#/etc/swift/container-server.conf
-	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_ip = $TARGET" ' /etc/swift/container-server.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_ip = $SWIFTIP" ' /etc/swift/container-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_port = 6001" ' /etc/swift/container-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "user = swift" ' /etc/swift/container-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "swift_dir = /etc/swift" ' /etc/swift/container-server.conf"
@@ -155,7 +171,7 @@ function install_swift_on_storage
 	ssh root@$TARGET "sed -i '/^\[filter:recon\]/a "recon_cache_path = /var/cache/swift" ' /etc/swift/container-server.conf"
 	
 	#/etc/swift/object-server.conf
-	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_ip = $TARGET" ' /etc/swift/object-server.conf"
+	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_ip = $SWIFTIP" ' /etc/swift/object-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "bind_port = 6000" ' /etc/swift/object-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "user = swift" ' /etc/swift/object-server.conf"
 	ssh root@$TARGET "sed -i '/^\[DEFAULT\]/a "swift_dir = /etc/swift" ' /etc/swift/object-server.conf"
@@ -173,7 +189,7 @@ function install_swift_on_storage
 
 	ssh root@$TARGET "systemctl enable openstack-swift-account.service openstack-swift-account-auditor.service \
   openstack-swift-account-reaper.service openstack-swift-account-replicator.service"
-	ssh root@$TARGET "start openstack-swift-account.service openstack-swift-account-auditor.service \
+	ssh root@$TARGET "systemctl start openstack-swift-account.service openstack-swift-account-auditor.service \
   openstack-swift-account-reaper.service openstack-swift-account-replicator.service"
 	ssh root@$TARGET "systemctl enable openstack-swift-container.service \
   openstack-swift-container-auditor.service openstack-swift-container-replicator.service \
@@ -186,6 +202,13 @@ function install_swift_on_storage
 	ssh root@$TARGET "systemctl start openstack-swift-object.service openstack-swift-object-auditor.service \
   openstack-swift-object-replicator.service openstack-swift-object-updater.service"
 
+  #/etc/swift/swift.conf
+  ssh root@$TARGET "curl -o /etc/swift/swift.conf http://installer/install/openstack-config/swift.conf"
+  ssh root@$TARGET "chown -R root:swift /etc/swift"
+	
+
+  
+
 }
 
 function init_swift_rings_on_controller
@@ -197,7 +220,9 @@ function init_swift_rings_on_controller
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder create 10 3 1"
 	for NODE in ${STORAGE_NODES[@]} 
 	do
-		ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder add --region 1 --zone 1 --ip $NODE --port 6002 --device sdb --weight 100"
+		ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder \
+  add --region 1 --zone 1 --ip $NODE --port 6002 \
+  --device sdb --weight 100" 
 	done
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder"
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder rebalance"

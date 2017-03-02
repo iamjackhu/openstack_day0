@@ -1,7 +1,7 @@
 #!/bin/bash
 
 HOST=$1
-CONTROLLER=$2
+SWIFTIP=$2
 
 source ./env
 
@@ -11,5 +11,5 @@ initial_host $HOST
 
 #swift
 source ./service/swift.sh
-install_swift_on_storage $HOST $swift_passwd 
+install_swift_on_storage $HOST $swift_passwd $SWIFTIP
 
