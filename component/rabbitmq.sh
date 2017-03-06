@@ -10,6 +10,10 @@ function install_rabitmq
 	ssh root@$TARGET "rabbitmqctl add_user openstack $PASSWD"
 	ssh root@$TARGET "rabbitmqctl set_permissions openstack \".*\" \".*\" \".*\" "
 
+	ssh root@$TARGET "sed -i '/Network Connectivity/a "{tcp_listeners, [{\"0.0.0.0\", 5672}]}" ' /etc/rabbitmq/rabbitmq.config "
+
+	
+	
 	
 
 	echo "### RabbitMQ installed"

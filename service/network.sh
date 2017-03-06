@@ -9,7 +9,7 @@ function install_network_on_controller
 	RABBIT_PASSWD=$4
 	NOVA_PASS=$5
 	INTERFACE=$6
-	MY_IP=`hostname -i`
+	MY_IP=$7
 
 	ssh root@$TARGET "mysql -e \"CREATE DATABASE neutron;\" -u root -p<<EOF
 $MYSQLPASSWD

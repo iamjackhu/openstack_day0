@@ -15,7 +15,10 @@ function initial_host
 	ssh root@$TARGET "echo 'export LANG=en_US.UTF-8' >> /root/.bashrc"
 
 	ssh root@$TARGET 'yum -y update'
-	ssh root@$TARGET 'yum install -y https://rdoproject.org/repos/rdo-release.rpm'
+	ssh root@$TARGET 'yum install -y https://repos.fedorapeople.org/repos/openstack/openstack-newton/rdo-release-newton-4.noarch.rpm'
+	# ssh root@$TARGET "sed -i -e 's/ocata/newton/g' /etc/yum.repos.d/rdo-release.repo "
+	# ssh root@$TARGET "sed -i -e 's/ocata/newton/g' /etc/yum.repos.d/rdo-testing.repo "
+	# ssh root@$TARGET "sed -i -e 's/ocata/newton/g' /etc/yum.repos.d/rdo-qemu-ev.repo "
 	ssh root@$TARGET 'yum -y upgrade'
 	ssh root@$TARGET 'yum -y install wget'
 

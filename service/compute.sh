@@ -6,7 +6,7 @@ function install_compute_on_controller
 	PASSWD=$2
 	MYSQLPASSWD=$3
 	RABBIT_PASSWD=$4
-	MY_IP=`hostname -i`
+	MY_IP=$5
 
 	ssh root@$TARGET "mysql -e \"CREATE DATABASE nova_api;\" -u root -p<<EOF
 $MYSQLPASSWD
@@ -61,8 +61,8 @@ project_name = service\\n\
 username = nova\\n\
 password = $PASSWD" ' /etc/nova/nova.conf"
 
-	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_listen = $my_ip" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_proxyclient_address = $my_ip" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_listen = $MY_IP" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_proxyclient_address = $MY_IP" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[glance\]/a "api_servers = http://$TARGET:9292" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[oslo_concurrency\]/a "lock_path = /var/lib/nova/tmp" ' /etc/nova/nova.conf"
 	
@@ -84,7 +84,7 @@ function install_compute_on_computer
 	PASSWD=$2
 	RABBIT_PASSWD=$3
 	CONTROLLER=$4
-	MY_IP=`hostname -i`
+	MY_IP=$5
 
 	ssh root@$TARGET "yum -y --nogpgcheck install openstack-nova-compute"
 
@@ -109,7 +109,7 @@ password = $PASSWD" ' /etc/nova/nova.conf"
 	
 	ssh root@$TARGET "sed -i '/^\[vnc\]/a "enabled = True" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_listen = 0.0.0.0" ' /etc/nova/nova.conf"
-	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_proxyclient_address = $my_ip" ' /etc/nova/nova.conf"
+	ssh root@$TARGET "sed -i '/^\[vnc\]/a "vncserver_proxyclient_address = $MY_IP" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[vnc\]/a "novncproxy_base_url = http://$CONTROLLER:6080/vnc_auto.html" ' /etc/nova/nova.conf"
 
 	ssh root@$TARGET "sed -i '/^\[glance\]/a "api_servers = http://$CONTROLLER:9292" ' /etc/nova/nova.conf"
