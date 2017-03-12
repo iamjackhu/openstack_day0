@@ -4,7 +4,7 @@ HOST=$1
 
 source ./env
 
-## prepare
+# # prepare
 # source ./service/prepare.sh
 # initial_host $HOST
 
@@ -24,7 +24,7 @@ source ./env
 # install_glance $HOST $glance_passwd $mysql_root_passwd
 
 # source ./service/compute.sh
-# controller_my_ip=10.0.1.100
+# controller_my_ip=10.0.1.102
 # install_compute_on_controller $HOST $compute_passwd $mysql_root_passwd $rabbit_passwd $controller_my_ip 
 
 # source ./service/network.sh
@@ -35,8 +35,14 @@ source ./env
 
 # init_swift_rings_on_controller $HOST $swift_passwd "$swift_node1 $swift_node2 $swift_node3"
 
+# source ./service/heat.sh
+# install_heat_on_controller $HOST $heat_passwd $mysql_root_passwd $rabbit_passwd
+
+source ./service/cinder.sh
+install_cinder_on_controller $HOST $cinder_passwd $mysql_root_passwd $rabbit_passwd 10.0.1.102
+
 # source ./service/dashboard.sh
 # install_dashboard $HOST
 
-source ./service/heat.sh
-install_heat_on_controller $HOST $heat_passwd $mysql_root_passwd $rabbit_passwd
+# source ./service/ceph.sh
+# install_ceph_at_controller $HOST

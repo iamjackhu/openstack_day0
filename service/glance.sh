@@ -40,7 +40,7 @@ username = glance\\n\
 password = $PASSWD\\n\
 " ' /etc/glance/glance-api.conf"
 	ssh root@$TARGET "sed -i '/\[paste_deploy\]/a "flavor = keystone\\n" ' /etc/glance/glance-api.conf"
-	ssh root@$TARGET "sed -i '/\[glance_store\]/a "stores = file,http\\ndefault_store = file\\nfilesystem_store_datadir = /home/glance/images/\n" ' /etc/glance/glance-api.conf"
+	ssh root@$TARGET "sed -i '/\[glance_store\]/a "stores = file,http\\ndefault_store = file\\nfilesystem_store_datadir = /home/glance/images" ' /etc/glance/glance-api.conf"
 	ssh root@$TARGET "chmod 777 /home"
 	ssh root@$TARGET "su -s /bin/sh -c \"mkdir -p /home/glance/images/\" glance"
 
