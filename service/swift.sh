@@ -3,10 +3,10 @@
 function init_swift_hostname
 {
 	TARGET=$1
-	ssh root@$TARGET "echo '10.0.3.102	proxy-server' >> /etc/hosts"
-	ssh root@$TARGET "echo '10.0.3.103	swift1' >> /etc/hosts"
-	ssh root@$TARGET "echo '10.0.3.104	swift2' >> /etc/hosts"
-	ssh root@$TARGET "echo '10.0.3.105	swift3' >> /etc/hosts"
+	ssh root@$TARGET "echo '10.0.3.102	proxy_storage' >> /etc/hosts"
+	ssh root@$TARGET "echo '10.0.3.103	storage1' >> /etc/hosts"
+	ssh root@$TARGET "echo '10.0.3.104	storage2' >> /etc/hosts"
+	ssh root@$TARGET "echo '10.0.3.105	storage3' >> /etc/hosts"
 }
 
 ### this step need todo on the node which want to access the storage service
@@ -18,7 +18,7 @@ function install_common_on_each_node
 
 	ssh root@$TARGET "mkdir -p /etc/swift;"
 
-	ssh root@$TARGET "yum -y --nogpgcheck install openstack-swift-proxy python-swiftclient memcached"
+	ssh root@$TARGET "yum -y install openstack-swift-proxy python-swiftclient memcached"
 
 	ssh root@$TARGET "curl -o /etc/swift/swift.conf http://installer/install/openstack-config/swift.conf"
 	ssh root@$TARGET "chown -R root:swift /etc/swift"
@@ -89,7 +89,7 @@ function install_swift_on_storage
 	PASSWD=$2
 	SWIFTIP=$3
 
-	ssh root@$TARGET "yum -y --nogpgcheck install xfsprogs rsync "
+	ssh root@$TARGET "yum -y install xfsprogs rsync "
 
 # 	#### todo 
 # 	#  parted /dev/sdb mklabel gpt
@@ -105,13 +105,13 @@ function install_swift_on_storage
 # Ignore
 # EOF"
 # 	#
-	ssh root@$TARGET "mkfs.xfs -f /dev/sdb"
-	ssh root@$TARGET "mkdir -p /srv/node/sdb"
+	ssh root@$TARGET "mkfs.xfs -f /dev/sda3"
+	ssh root@$TARGET "mkdir -p /srv/node/sda3"
 
 	#/etc/fstab
-	ssh root@$TARGET "echo '/dev/sdb /srv/node/sdb xfs noatime,nodiratime,nobarrier,logbufs=8 0 2' >> /etc/fstab"
+	ssh root@$TARGET "echo '/dev/sda3 /srv/node/sda3 xfs noatime,nodiratime,nobarrier,logbufs=8 0 2' >> /etc/fstab"
 
-	ssh root@$TARGET "mount /srv/node/sdb"
+	ssh root@$TARGET "mount /srv/node/sda3"
 
 	# /etc/rsyncd.conf
 	ssh root@$TARGET "echo 'uid = swift' > /etc/rsyncd.conf"
@@ -142,7 +142,7 @@ function install_swift_on_storage
     ssh root@$TARGET "systemctl start rsyncd.service"
 
 
-    ssh root@$TARGET "yum -y --nogpgcheck install wget openstack-swift-account openstack-swift-container openstack-swift-object"
+    ssh root@$TARGET "yum -y install wget openstack-swift-account openstack-swift-container openstack-swift-object"
 
     ssh root@$TARGET "mkdir -p /etc/swift/"
     ssh root@$TARGET "curl -o /etc/swift/account-server.conf http://installer/install/openstack-config/account-server.conf"
@@ -222,7 +222,7 @@ function init_swift_rings_on_controller
 	do
 		ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder \
   add --region 1 --zone 1 --ip $NODE --port 6002 \
-  --device sdb --weight 100" 
+  --device sda3 --weight 100" 
 	done
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder"
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder account.builder rebalance"
@@ -233,7 +233,7 @@ function init_swift_rings_on_controller
 	do
 		ssh root@$TARGET "cd /etc/swift; swift-ring-builder container.builder \
   add --region 1 --zone 1 --ip $NODE --port 6001 \
-  --device sdb --weight 100"
+  --device sda3 --weight 100"
 	done
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder container.builder"
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder container.builder rebalance"
@@ -244,7 +244,7 @@ function init_swift_rings_on_controller
 	do
 		ssh root@$TARGET "cd /etc/swift; swift-ring-builder object.builder \
   add --region 1 --zone 1 --ip $NODE --port 6000 \
-  --device sdb --weight 100"
+  --device sda3 --weight 100"
 	done
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder object.builder"
 	ssh root@$TARGET "cd /etc/swift; swift-ring-builder object.builder rebalance"

@@ -5,6 +5,7 @@ function install_glance
 	TARGET=$1
 	PASSWD=$2
 	MYSQLPASSWD=$3
+	STORAGE_TYPE=$4
 
 	ssh root@$TARGET "mysql -e \"CREATE DATABASE glance;\" -u root -p<<EOF
 $MYSQLPASSWD
@@ -40,7 +41,20 @@ username = glance\\n\
 password = $PASSWD\\n\
 " ' /etc/glance/glance-api.conf"
 	ssh root@$TARGET "sed -i '/\[paste_deploy\]/a "flavor = keystone\\n" ' /etc/glance/glance-api.conf"
-	ssh root@$TARGET "sed -i '/\[glance_store\]/a "stores = file,http\\ndefault_store = file\\nfilesystem_store_datadir = /home/glance/images" ' /etc/glance/glance-api.conf"
+	
+	if [ "$STORAGE_TYPE" = "ceph" ]; then
+		ssh root@$TARGET "sed -i '/^\[glance_store\]/a "stores = rbd" ' /etc/glance/glance-api.conf"
+		ssh root@$TARGET "sed -i '/^\[glance_store\]/a "default_store = rbd" ' /etc/glance/glance-api.conf"
+		ssh root@$TARGET "sed -i '/^\[glance_store\]/a "rbd_store_pool = images" ' /etc/glance/glance-api.conf"
+		ssh root@$TARGET "sed -i '/^\[glance_store\]/a "rbd_store_user = glance" ' /etc/glance/glance-api.conf"
+		ssh root@$TARGET "sed -i '/^\[glance_store\]/a "rbd_store_ceph_conf = /etc/ceph/ceph.conf" ' /etc/glance/glance-api.conf"
+		ssh root@$TARGET "sed -i '/^\[glance_store\]/a "rbd_store_chunk_size = 8" ' /etc/glance/glance-api.conf"
+
+		ssh root@$TARGET "ceph auth get-or-create client.glance > /etc/ceph/ceph.client.glance.keyring"
+		ssh root@$TARGET "sudo chown glance:glance /etc/ceph/ceph.client.glance.keyring"
+	else
+		ssh root@$TARGET "sed -i '/^\[glance_store\]/a "stores = file,http\\ndefault_store = file\\nfilesystem_store_datadir = /home/glance/images" ' /etc/glance/glance-api.conf"
+	fi 
 	ssh root@$TARGET "chmod 777 /home"
 	ssh root@$TARGET "su -s /bin/sh -c \"mkdir -p /home/glance/images/\" glance"
 

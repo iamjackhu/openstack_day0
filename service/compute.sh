@@ -85,6 +85,8 @@ function install_compute_on_computer
 	RABBIT_PASSWD=$3
 	CONTROLLER=$4
 	MY_IP=$5
+	STORAGE_TYPE=$6
+	RBD_UUID=$7
 
 	ssh root@$TARGET "yum -y --nogpgcheck install openstack-nova-compute"
 
@@ -115,6 +117,18 @@ password = $PASSWD" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[glance\]/a "api_servers = http://$CONTROLLER:9292" ' /etc/nova/nova.conf"
 	ssh root@$TARGET "sed -i '/^\[oslo_concurrency\]/a "lock_path = /var/lib/nova/tmp" ' /etc/nova/nova.conf"
 	
+	if [ "$STORAGE_TYPE" = "ceph" ]; then
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "rbd_user = cinder" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "rbd_secret_uuid = $RBD_UUID" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "inject_password = false" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "inject_key = false" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "inject_partition = -2" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "disk_cachemodes=\"network=writeback\"" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "libvirt_images_type = rbd" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "libvirt_images_rbd_pool = vms" ' /etc/nova/nova.conf"
+		ssh root@$TARGET "sed -i '/^\[libvirt\]/a "libvirt_images_rbd_ceph_conf = /etc/ceph/ceph.conf" ' /etc/nova/nova.conf"
+	fi
+
 	ssh root@$TARGET "systemctl enable libvirtd.service openstack-nova-compute.service"
-	ssh root@$TARGET "systemctl start libvirtd.service openstack-nova-compute.service"
+	ssh root@$TARGET "systemctl restart libvirtd.service openstack-nova-compute.service"
 }

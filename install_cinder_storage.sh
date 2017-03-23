@@ -12,5 +12,6 @@ source ./env
 
 # ###### cinder
 source ./service/cinder.sh
-install_cinder_on_storage $HOST $cinder_passwd $mysql_root_passwd $rabbit_passwd $MY_IP $CONTROLLER
+STORAGETYPE=ceph
+install_cinder_on_storage $HOST $cinder_passwd $mysql_root_passwd $rabbit_passwd $MY_IP $CONTROLLER $STORAGETYPE $rbd_uuid
 

@@ -8,12 +8,16 @@ export compute_passwd=openstack
 export network_passwd=openstack
 export swift_passwd=openstack
 
-export controller_provider_interface=enp3s0
-export computer_provider_interface=enp2s0f1
+export controller_provider_interface=enp4s0
+export computer_provider_interface=eno1
 
-export swift_node1=10.0.3.103
-export swift_node2=10.0.3.104
-export swift_node3=10.0.3.105
-export swift_proxy=10.0.3.102
+export storage1=10.0.3.103
+export storage2=10.0.3.104
+export storage3=10.0.3.105
+export proxy_storage=10.0.3.102
 
 export heat_passwd=openstack
+
+export cinder_passwd=openstack
+
+export rbd_uuid=8033ef86-0be1-11e7-93ae-92361f002671

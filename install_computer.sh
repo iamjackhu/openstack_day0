@@ -6,13 +6,14 @@ compute_my_ip=$3
 
 source ./env
 
-# #prepare
-# source ./service/prepare.sh
-# initial_host $HOST
+#### prepare
+source ./service/prepare.sh
+initial_host $HOST
 
-#compute
+##### compute
 source ./service/compute.sh
-install_compute_on_computer $HOST $compute_passwd $rabbit_passwd $CONTROLLER $compute_my_ip
+install_compute_on_computer $HOST $compute_passwd $rabbit_passwd $CONTROLLER $compute_my_ip ceph $rbd_uuid
 
 source ./service/network.sh
+computer_provider_interface=enp2s0f1
 install_network_on_computer $HOST $network_passwd $CONTROLLER $rabbit_passwd $compute_passwd $computer_provider_interface $compute_my_ip
