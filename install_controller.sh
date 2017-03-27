@@ -35,11 +35,11 @@ source ./env
 
 # init_swift_rings_on_controller $HOST $swift_passwd "$storage1 $storage2 $storage3"
 
-# source ./service/heat.sh
-# install_heat_on_controller $HOST $heat_passwd $mysql_root_passwd $rabbit_passwd
+source ./service/heat.sh
+install_heat_on_controller $HOST $heat_passwd $mysql_root_passwd $rabbit_passwd
 
-source ./service/cinder.sh
-install_cinder_on_controller $HOST $cinder_passwd $mysql_root_passwd $rabbit_passwd 10.0.1.102 ceph $rbd_uuid
+# source ./service/cinder.sh
+# install_cinder_on_controller $HOST $cinder_passwd $mysql_root_passwd $rabbit_passwd 10.0.1.102 ceph $rbd_uuid
 
 # source ./service/dashboard.sh
 # install_dashboard $HOST

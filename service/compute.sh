@@ -131,4 +131,18 @@ password = $PASSWD" ' /etc/nova/nova.conf"
 
 	ssh root@$TARGET "systemctl enable libvirtd.service openstack-nova-compute.service"
 	ssh root@$TARGET "systemctl restart libvirtd.service openstack-nova-compute.service"
+
+	if [ "$STORAGE_TYPE" = "ceph" ]; then
+		ssh root@$TARGET "echo '<secret ephemeral='no' private='no'>
+  <uuid>8033ef86-0be1-11e7-93ae-92361f002671</uuid>
+  <usage type='ceph'>
+    <name>client.cinder secret</name>
+  </usage>
+</secret>' > secret.xml" 
+		ssh root@$TARGET "virsh secret-define --file secret.xml"
+		ssh root@$TARGET "virsh secret-set-value --secret 8033ef86-0be1-11e7-93ae-92361f002671 --base64 AQANrc5YInkrARAA2cqo0yd/gbeCHQ4EAGezRQ=="
+		ssh root@$TARGET "mkdir /var/run/ceph/guests/ /var/log/qemu/"
+		ssh root@$TARGET "chmod 777 /var/run/ceph/guests/ /var/log/qemu/"
+		ssh root@$TARGET "systemctl restart libvirtd.service openstack-nova-compute.service"
+	fi
 }
