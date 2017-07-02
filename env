@@ -9,7 +9,7 @@ export network_passwd=openstack
 export swift_passwd=openstack
 
 export controller_provider_interface=enp4s0
-export computer_provider_interface=eno1
+export computer_provider_interface=en7s0
 
 export storage1=10.0.3.103
 export storage2=10.0.3.104

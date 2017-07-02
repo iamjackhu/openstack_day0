@@ -16,5 +16,4 @@ storagetype=ceph
 install_compute_on_computer $HOST $compute_passwd $rabbit_passwd $CONTROLLER $compute_my_ip $storagetype $rbd_uuid
 
 source ./service/network.sh
-computer_provider_interface=enp3s0
 install_network_on_computer $HOST $network_passwd $CONTROLLER $rabbit_passwd $compute_passwd $computer_provider_interface $compute_my_ip
